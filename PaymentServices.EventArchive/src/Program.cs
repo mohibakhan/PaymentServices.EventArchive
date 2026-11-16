@@ -31,7 +31,23 @@ public static class Program
                 // Settings
                 services.AddOptions<EventArchiveSettings>()
                     .Configure<IConfiguration>((settings, cfg) =>
-                        cfg.GetSection(EventArchiveSettings.SectionName).Bind(settings));
+                    {
+                        cfg.GetSection(EventArchiveSettings.SectionName).Bind(settings);
+
+                        // The trigger's topic and subscription are host-level
+                        // application settings (not App Configuration keys).
+                        settings.SERVICE_BUS_TOPIC_NAME =
+                            cfg["SERVICE_BUS_TOPIC_NAME"] ?? settings.SERVICE_BUS_TOPIC_NAME;
+                        settings.SERVICE_BUS_SUBSCRIPTION_NAME =
+                            cfg["SERVICE_BUS_SUBSCRIPTION_NAME"] ?? settings.SERVICE_BUS_SUBSCRIPTION_NAME;
+
+                        // The storage connection string is added to the Function
+                        // App by hand as a plain STORAGE_CONNSTRING setting.
+                        if (string.IsNullOrWhiteSpace(settings.STORAGE_CONNSTRING))
+                        {
+                            settings.STORAGE_CONNSTRING = cfg["STORAGE_CONNSTRING"];
+                        }
+                    });
 
                 services.AddSingleton(TimeProvider.System);
 
@@ -125,7 +141,7 @@ public static class Program
         }
 
         throw new InvalidOperationException(
-            $"Blob storage is not configured. Set {EventArchiveSettings.SectionName}:STORAGE_CONNSTRING " +
-            $"or {EventArchiveSettings.SectionName}:STORAGE_ACCOUNT_URL.");
+            "Blob storage is not configured. Add a STORAGE_CONNSTRING application setting, " +
+            $"or set {EventArchiveSettings.SectionName}:STORAGE_ACCOUNT_URL to use managed identity.");
     }
 }
