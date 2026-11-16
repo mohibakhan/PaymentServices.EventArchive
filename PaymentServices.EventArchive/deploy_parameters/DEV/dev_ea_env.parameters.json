@@ -1,0 +1,10 @@
+{
+  "eventArchive:AppSettings:SERVICE_BUS_TOPIC_NAME": "paymentservicestopic",
+  "eventArchive:AppSettings:SERVICE_BUS_SUBSCRIPTION_NAME": "eventarchive",
+  "eventArchive:AppSettings:STORAGE_CONTAINER_NAME": "events",
+  "eventArchive:AppSettings:MESSAGE_TYPE_PROPERTY_NAMES": "messageType,eventType",
+  "eventArchive:AppSettings:SEARCH_DEFAULT_PAGE_SIZE": 50,
+  "eventArchive:AppSettings:SEARCH_MAX_PAGE_SIZE": 500,
+  "eventArchive:AppSettings:SEARCH_MAX_RANGE_DAYS": 31,
+  "eventArchive:AppSettings:SEARCH_TIME_BUDGET_SECONDS": 20
+}

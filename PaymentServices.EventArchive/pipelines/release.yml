@@ -1,0 +1,61 @@
+# PaymentServices.EventArchive — RELEASE pipeline (CD)
+#
+# Runs automatically when the build pipeline completes on main and deploys the
+# same package DEV → QA → PROD. Each stage targets an Azure DevOps Environment;
+# put approvals and checks on the QA and PROD environments
+# (Pipelines → Environments → {environment} → Approvals and checks) to gate
+# promotion.
+#
+# BEFORE THE FIRST RUN, replace the placeholders below:
+#   resources.pipelines.source   the name of the build pipeline in Azure DevOps
+#   azureSubscription            the service connection for each environment
+#   functionAppName / resourceGroupName   the Function App that already exists
+#                                         in each environment
+# and fill in the Key Vault names in deploy_parameters/*/*_ea_keyvault.parameters.json.
+
+name: $(Date:yyyyMMdd)$(Rev:.r)
+
+trigger: none
+pr: none
+
+resources:
+  pipelines:
+    - pipeline: build
+      source: PaymentServices.EventArchive-Build
+      trigger:
+        branches:
+          include:
+            - main
+
+stages:
+  - template: templates/deploy-stage.yml
+    parameters:
+      stageName: DEV
+      dependsOn: []
+      environment: pmtsvc-eventarchive-dev
+      azureSubscription: <dev-service-connection>
+      functionAppName: fa-pmtsvc-eventarchive-dev-centralus
+      resourceGroupName: <dev-resource-group>
+      parametersFolder: DEV
+
+  - template: templates/deploy-stage.yml
+    parameters:
+      stageName: QA
+      dependsOn:
+        - DEV
+      environment: pmtsvc-eventarchive-qa
+      azureSubscription: <qa-service-connection>
+      functionAppName: fa-pmtsvc-eventarchive-qa-centralus
+      resourceGroupName: <qa-resource-group>
+      parametersFolder: QA
+
+  - template: templates/deploy-stage.yml
+    parameters:
+      stageName: PROD
+      dependsOn:
+        - QA
+      environment: pmtsvc-eventarchive-prod
+      azureSubscription: <prod-service-connection>
+      functionAppName: fa-pmtsvc-eventarchive-prod-eastus
+      resourceGroupName: <prod-resource-group>
+      parametersFolder: PROD

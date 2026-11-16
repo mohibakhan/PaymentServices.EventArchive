@@ -1,0 +1,4 @@
+{
+  "eventArchive:AppSettings:SERVICE_BUS_CONNSTRING": "@Microsoft.KeyVault(VaultName=<prod-key-vault-name>;SecretName=<service-bus-connection-string-secret>)",
+  "eventArchive:AppSettings:STORAGE_CONNSTRING": "@Microsoft.KeyVault(VaultName=<prod-key-vault-name>;SecretName=<event-archive-storage-connection-string-secret>)"
+}

@@ -1,0 +1,106 @@
+# PaymentServices.EventArchive — BUILD pipeline (CI)
+#
+# Restores, builds and tests the solution, then publishes one artifact, "drop":
+#   drop/PaymentServices.EventArchive.zip   the function app package
+#   drop/deploy_parameters/**               per-environment settings
+#
+# The release pipeline (pipelines/release.yml) picks this artifact up.
+# Pull requests are built and tested but publish nothing.
+
+name: $(Date:yyyyMMdd)$(Rev:.r)
+
+trigger:
+  branches:
+    include:
+      - main
+  paths:
+    exclude:
+      - README.md
+
+pr:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: ubuntu-latest
+
+variables:
+  buildConfiguration: Release
+  dotnetSdkVersion: 10.0.x
+  functionProject: src/PaymentServices.EventArchive.csproj
+  testProject: tests/PaymentServices.EventArchive.UnitTests/PaymentServices.EventArchive.UnitTests.csproj
+  packageName: PaymentServices.EventArchive
+
+steps:
+  - task: UseDotNet@2
+    displayName: Use .NET SDK $(dotnetSdkVersion)
+    inputs:
+      packageType: sdk
+      version: $(dotnetSdkVersion)
+
+  # Every package this solution uses is on nuget.org. If your agents may only
+  # reach an internal Azure Artifacts feed, add `vstsFeed: <project>/<feed>`.
+  - task: DotNetCoreCLI@2
+    displayName: Restore
+    inputs:
+      command: restore
+      projects: |
+        $(functionProject)
+        $(testProject)
+      feedsToUse: select
+
+  - task: DotNetCoreCLI@2
+    displayName: Build
+    inputs:
+      command: build
+      projects: |
+        $(functionProject)
+        $(testProject)
+      arguments: --configuration $(buildConfiguration) --no-restore
+
+  - task: DotNetCoreCLI@2
+    displayName: Test
+    inputs:
+      command: test
+      projects: $(testProject)
+      arguments: --configuration $(buildConfiguration) --no-build --collect:"XPlat Code Coverage"
+      publishTestResults: true
+
+  - task: PublishCodeCoverageResults@2
+    displayName: Publish code coverage
+    condition: succeededOrFailed()
+    inputs:
+      summaryFileLocation: $(Agent.TempDirectory)/**/coverage.cobertura.xml
+
+  - task: DotNetCoreCLI@2
+    displayName: Publish function app
+    inputs:
+      command: publish
+      publishWebProjects: false
+      projects: $(functionProject)
+      arguments: --configuration $(buildConfiguration) --no-restore --output $(Build.ArtifactStagingDirectory)/publish
+      zipAfterPublish: false
+      modifyOutputPath: false
+
+  # host.json must sit at the root of the package, so zip the folder's contents.
+  - task: ArchiveFiles@2
+    displayName: Package function app
+    inputs:
+      rootFolderOrFile: $(Build.ArtifactStagingDirectory)/publish
+      includeRootFolder: false
+      archiveType: zip
+      archiveFile: $(Build.ArtifactStagingDirectory)/drop/$(packageName).zip
+      replaceExistingArchive: true
+
+  - task: CopyFiles@2
+    displayName: Stage deploy parameters
+    inputs:
+      SourceFolder: deploy_parameters
+      Contents: '**/*.json'
+      TargetFolder: $(Build.ArtifactStagingDirectory)/drop/deploy_parameters
+
+  - publish: $(Build.ArtifactStagingDirectory)/drop
+    artifact: drop
+    displayName: Publish artifact
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))

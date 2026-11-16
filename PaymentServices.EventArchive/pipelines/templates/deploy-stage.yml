@@ -1,0 +1,140 @@
+# One deployment stage: apply settings, deploy the package, smoke test.
+
+parameters:
+  - name: stageName
+    type: string
+  - name: dependsOn
+    type: object
+    default: []
+  - name: environment
+    type: string
+  - name: azureSubscription
+    type: string
+  - name: functionAppName
+    type: string
+  - name: resourceGroupName
+    type: string
+  # Folder under deploy_parameters holding this environment's *.parameters.json
+  - name: parametersFolder
+    type: string
+  # functionApp (Windows plan) or functionAppLinux (Linux plan)
+  - name: appType
+    type: string
+    default: functionApp
+    values:
+      - functionApp
+      - functionAppLinux
+  - name: packageName
+    type: string
+    default: PaymentServices.EventArchive
+
+stages:
+  - stage: ${{ parameters.stageName }}
+    displayName: Deploy ${{ parameters.stageName }}
+    dependsOn: ${{ parameters.dependsOn }}
+    jobs:
+      - deployment: deploy
+        displayName: Deploy to ${{ parameters.functionAppName }}
+        environment: ${{ parameters.environment }}
+        pool:
+          vmImage: ubuntu-latest
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: none
+
+                - download: build
+                  artifact: drop
+                  displayName: Download build artifact
+
+                # Every key in this environment's *.parameters.json files
+                # becomes a Function App application setting.
+                #
+                # They have to be application settings (not only Azure App
+                # Configuration) because the Service Bus trigger's topic,
+                # subscription and connection are resolved by the Functions
+                # host. ':' in a key is written as '__', which .NET reads back
+                # as ':' and which is valid on both Windows and Linux plans.
+                # Values go through a file so Key Vault references
+                # (@Microsoft.KeyVault(...)) need no shell escaping.
+                - task: AzureCLI@2
+                  displayName: Apply application settings
+                  inputs:
+                    azureSubscription: ${{ parameters.azureSubscription }}
+                    scriptType: pscore
+                    scriptLocation: inlineScript
+                    inlineScript: |
+                      $ErrorActionPreference = 'Stop'
+
+                      $folder = Join-Path '$(Pipeline.Workspace)' 'build/drop/deploy_parameters/${{ parameters.parametersFolder }}'
+                      $files = @(Get-ChildItem -Path $folder -Filter '*.parameters.json' | Sort-Object Name)
+                      if ($files.Count -eq 0) { throw "No *.parameters.json files found in $folder" }
+
+                      $settings = [ordered]@{}
+                      foreach ($file in $files) {
+                        $json = Get-Content -Path $file.FullName -Raw | ConvertFrom-Json
+                        foreach ($property in $json.PSObject.Properties) {
+                          $value = [string]$property.Value
+                          if ($value -match '<[^>]+>') {
+                            throw "Setting '$($property.Name)' in $($file.Name) still contains a <placeholder>."
+                          }
+                          $settings[$property.Name.Replace(':', '__')] = $value
+                        }
+                      }
+
+                      $settingsFile = Join-Path '$(Agent.TempDirectory)' 'appsettings.json'
+                      $settings | ConvertTo-Json -Depth 3 | Set-Content -Path $settingsFile -Encoding utf8
+
+                      Write-Host "Applying $($settings.Count) setting(s): $($settings.Keys -join ', ')"
+                      az functionapp config appsettings set `
+                        --name '${{ parameters.functionAppName }}' `
+                        --resource-group '${{ parameters.resourceGroupName }}' `
+                        --settings "@$settingsFile" `
+                        --output none
+                      if ($LASTEXITCODE -ne 0) { throw 'Failed to apply application settings.' }
+
+                - task: AzureFunctionApp@2
+                  displayName: Deploy function app
+                  inputs:
+                    azureSubscription: ${{ parameters.azureSubscription }}
+                    appType: ${{ parameters.appType }}
+                    appName: ${{ parameters.functionAppName }}
+                    resourceGroupName: ${{ parameters.resourceGroupName }}
+                    package: $(Pipeline.Workspace)/build/drop/${{ parameters.packageName }}.zip
+                    deploymentMethod: auto
+
+                # GET /api/health returns 200 only when the app has started and
+                # can reach its blob storage.
+                - task: AzureCLI@2
+                  displayName: Smoke test
+                  inputs:
+                    azureSubscription: ${{ parameters.azureSubscription }}
+                    scriptType: pscore
+                    scriptLocation: inlineScript
+                    inlineScript: |
+                      $ErrorActionPreference = 'Stop'
+
+                      $hostName = az functionapp show `
+                        --name '${{ parameters.functionAppName }}' `
+                        --resource-group '${{ parameters.resourceGroupName }}' `
+                        --query defaultHostName --output tsv
+                      if ($LASTEXITCODE -ne 0 -or -not $hostName) { throw 'Could not resolve the function app host name.' }
+
+                      $url = "https://$hostName/api/health"
+                      for ($attempt = 1; $attempt -le 12; $attempt++) {
+                        try {
+                          $response = Invoke-WebRequest -Uri $url -TimeoutSec 30 -SkipHttpErrorCheck
+                          if ($response.StatusCode -eq 200) {
+                            Write-Host "Healthy: $url"
+                            exit 0
+                          }
+                          Write-Host "Attempt ${attempt}: HTTP $($response.StatusCode)"
+                        }
+                        catch {
+                          Write-Host "Attempt ${attempt}: $($_.Exception.Message)"
+                        }
+                        Start-Sleep -Seconds 15
+                      }
+
+                      throw "Health check did not return 200 within 3 minutes: $url"

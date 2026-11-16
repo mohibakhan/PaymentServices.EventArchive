@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PaymentServices.EventArchive.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PaymentServices.EventArchive.UnitTests/PaymentServices.EventArchive.UnitTests.csproj" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".gitignore" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/pipelines/">
+    <File Path="pipelines/build.yml" />
+    <File Path="pipelines/release.yml" />
+    <File Path="pipelines/templates/deploy-stage.yml" />
+  </Folder>
+</Solution>
