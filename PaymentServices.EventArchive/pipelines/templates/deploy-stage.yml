@@ -7,9 +7,16 @@
   "WITRLCHGDT": "2026-11-16-12.44.09.798283",
   "WITRMNTS": "2026-11-16-12.44.11.658925",
   "WITRLICODE": "CTRC",
-  "WIHBFRTPC": "", "WIHEACHAMT": "", "WIHFEETC": "", "WIHINPRSN": "",
-  "WIHORGPST": "", "WIHPSTDTS": "", "WIHPSTTC": "", "WIHRCEMUID": "",
-  "WIHWAVFEE": "", "WIHWAVOFR": "",
+  "WIHBFRTPC": "",
+  "WIHEACHAMT": "",
+  "WIHFEETC": "",
+  "WIHINPRSN": "",
+  "WIHORGPST": "",
+  "WIHPSTDTS": "",
+  "WIHPSTTC": "",
+  "WIHRCEMUID": "",
+  "WIHWAVFEE": "",
+  "WIHWAVOFR": "",
   "WITRSTATE": "Ack",
   "WITRSTAT": "Complete",
   "WITRIMAD": "20261116MMQFMPD1000131",
@@ -30,7 +37,187 @@
   "receivingFinancialInstitutionName": "JPMCHASE",
   "beneficiaryName": "AVENUE CASH LLC",
   "WireISOType": "CustXfer",
-  "WireTrnIsoInqRec": { /* identical to wireApiResponse.WireTrnIsoInqRec in the Cosmos doc */ },
+  "WireTrnIsoInqRec": {
+    "OrignFinInstRtId": "611363259",
+    "DestFinInstRtId": "021151080",
+    "SndrFinInstRtId": "084106768",
+    "RecvFinInstRtId": "021000021",
+    "WireCrtTimeDt": "2026-11-16T18:39:32+00:00",
+    "WirePurpCode": null,
+    "WirePurpInfo": null,
+    "WireIMAD": "20261116MMQFMPD1000131",
+    "WireOMAD": "20261116MMQFMP2H09181611161344FT03",
+    "WireStatDesc": "Complete",
+    "WireRegPrxyType": null,
+    "WireSvcPrvdInfo": {
+      "WireAcctId": "9900006934",
+      "WireAcctType": "D",
+      "AvlBalCalcCode": "1",
+      "WireCompId": "210",
+      "WireCompEmplId": null,
+      "WireCompEmplName": null,
+      "WireCompVerifId": null,
+      "WireCompVerifName": null,
+      "WireCorrelId": "2764dda7-bff3-4869-a29c-4889c4c82d82",
+      "FraudRefId": null,
+      "WireTrnType": "Outgoing",
+      "TaxId": null,
+      "OffCode": null,
+      "WireAnlysCode": "105",
+      "WireFeeAmt": null,
+      "WireTmpltCrt": null,
+      "WireTmpltDesc": null,
+      "WireTmpltRef": null,
+      "WireStat": "Complete",
+      "BrCode": null,
+      "GLCostCtr": null,
+      "GLProdCode": null,
+      "WireNotType": "Prt",
+      "WireSrc": "FIClerk",
+      "IntnetFinInstId": null,
+      "FornWireType": false,
+      "InPersonWireType": false,
+      "RemitSubjRuleType": false,
+      "WireSchedRecArray": false,
+      "WireSrcDestCode": "FD"
+    },
+    "WirePmtTypeInfo": {
+      "InstrId": null,
+      "WireRefId": "NOTPROVIDED",
+      "InstrTrnId": null,
+      "WireUETR": "a752a6c3-02c7-4e33-8270-f79334cc0d0b",
+      "HighPryType": false,
+      "SvcLvlInfoArray": null,
+      "LocalTrfType": "CustTrf",
+      "CatPurpType": null,
+      "CatPurpDesc": null,
+      "WireAmt": "10316.57",
+      "InstrAmt": "10316.57000",
+      "CurrType": "USD",
+      "CurrExchRate": null
+    },
+    "WireChgInfo": {
+      "DetOfChgType": "Shared",
+      "WireChgArray": null
+    },
+    "WireAgentInfoArray": {
+      "WireAgentRec": [
+        {
+          "WireAgentType": "CrAgent",
+          "WireAgentSeq": null,
+          "WireFinInstInfo": {
+            "InstRtId": "021000021",
+            "InstBIC": null,
+            "FinInstName": "JPMCHASE",
+            "AddrISO": {
+              "FreeFormAddrArray": null,
+              "BldgFloor": "3RD FLOOR",
+              "BldgId": null,
+              "BldgName": null,
+              "BldgRmId": null,
+              "City": "TAMPA",
+              "CntryType": "US",
+              "County": null,
+              "Dept": null,
+              "PostalCode": "33610",
+              "PostOffBoxId": null,
+              "StateProv": "FL",
+              "Street1": null,
+              "SubDept": null,
+              "SubDivName": null
+            },
+            "FinInstRtIdType": "USABA"
+          }
+        },
+        {
+          "WireAgentType": "DrAgent",
+          "WireAgentSeq": null,
+          "WireFinInstInfo": {
+            "InstRtId": "084106768",
+            "InstBIC": null,
+            "FinInstName": "Evolve Bank & Trust",
+            "AddrISO": {
+              "FreeFormAddrArray": null,
+              "BldgFloor": null,
+              "BldgId": null,
+              "BldgName": null,
+              "BldgRmId": null,
+              "City": "Memphis",
+              "CntryType": "US",
+              "County": null,
+              "Dept": null,
+              "PostalCode": "38119",
+              "PostOffBoxId": null,
+              "StateProv": "TN",
+              "Street1": "6000 Poplar Avenue, Suite 300",
+              "SubDept": null,
+              "SubDivName": null
+            },
+            "FinInstRtIdType": "USABA"
+          }
+        }
+      ]
+    },
+    "WireEntityInfoArray": {
+      "WireEntityRec": [
+        {
+          "WireEntityType": "CrEntity",
+          "EntityName": "AVENUE CASH LLC",
+          "AddrISO": {
+            "FreeFormAddrArray": null,
+            "BldgFloor": null,
+            "BldgId": null,
+            "BldgName": null,
+            "BldgRmId": null,
+            "City": "MIAMI",
+            "CntryType": "US",
+            "County": null,
+            "Dept": null,
+            "PostalCode": "33133",
+            "PostOffBoxId": null,
+            "StateProv": "FL",
+            "Street1": "2601 S BAYSHORE DR, SUITE 1100",
+            "SubDept": null,
+            "SubDivName": null
+          },
+          "ResCntryType": null,
+          "WireFinInstAcctInfo": {
+            "AcctId": "725626896",
+            "IBAN": null
+          }
+        },
+        {
+          "WireEntityType": "DrEntity",
+          "EntityName": "AVENUE CASH LLC",
+          "AddrISO": {
+            "FreeFormAddrArray": null,
+            "BldgFloor": null,
+            "BldgId": null,
+            "BldgName": null,
+            "BldgRmId": "SUITE 1100",
+            "City": "MIAMI",
+            "CntryType": "US",
+            "County": null,
+            "Dept": null,
+            "PostalCode": "331330000",
+            "PostOffBoxId": null,
+            "StateProv": "Florida",
+            "Street1": "2601 S. Bayshore Drive",
+            "SubDept": null,
+            "SubDivName": null
+          },
+          "ResCntryType": null,
+          "WireFinInstAcctInfo": {
+            "AcctId": "9900006934",
+            "IBAN": null
+          }
+        }
+      ]
+    },
+    "WireRemitInfo": {
+      "FreeFormRemitInfo": "ACCOUNT TRANSFER"
+    }
+  },
   "WireTrnDrwdwnInqRec": null,
   "WireTrnFinInstISOInqRec": null,
   "WirePmtRetInqRec": null
